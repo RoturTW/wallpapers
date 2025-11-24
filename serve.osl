@@ -1,0 +1,30 @@
+
+def serveSizedPreview(*gin.Context c) (
+    string name = c.Param("name")
+    if name == "" (
+        c.JSON(400, {error: "Name is required"})
+        return
+    )
+
+    string filePath = fs.JoinPath("./static", name)
+    if !fs.Exists(filePath) (
+        c.JSON(404, {error: "File not found"})
+        return
+    )
+
+    c.Data(200, "image/jpeg", resizeImageFile(filePath, 200))
+)
+
+def resizeImageFile(string filePath, int height) []byte (
+    string img_id = img.DecodeFile(filePath)
+    object size = img.Size(img_id)
+
+    int originalWidth = size.w
+    int originalHeight = size.h
+
+    number aspectRatio = originalWidth / originalHeight
+    int newWidth = round(height * aspectRatio)
+
+    string resized = img.Resize(img_id, newWidth, height)
+    return img.EncodeJPEG(resized, 80)
+)

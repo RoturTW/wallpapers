@@ -1,0 +1,31 @@
+import "osl/img"
+import "osl/fs"
+
+import "github.com/gin-gonic/gin"
+
+import "./serve.osl"
+
+def noCORS(*gin.Context c) (
+    c.Header("Access-Control-Allow-Origin", "*")
+    c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+    c.Header("Access-Control-Allow-Headers", "*")
+    if c.Request.Method == "OPTIONS" (
+        c.AbortWithStatus(204)
+        return
+    )
+    c.Next()
+)
+
+def main() (
+    gin.SetMode("release")
+
+    r := gin.Default()
+    r.Use(noCORS)
+
+    r.Static("/static", "./static")
+
+    r.GET("/preview/:name", serveSizedPreview)
+
+    log r.Run
+    r.Run(":5710")
+)
