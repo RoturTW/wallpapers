@@ -17,6 +17,7 @@ def serveSizedPreview(*gin.Context c) (
 
 def resizeImageFile(string filePath, int height) []byte (
     string img_id = img.DecodeFile(filePath)
+    defer img.Free(img_id)
     object size = img.Size(img_id)
 
     int originalWidth = size.w
@@ -26,5 +27,6 @@ def resizeImageFile(string filePath, int height) []byte (
     int newWidth = round(height * aspectRatio)
 
     string resized = img.Resize(img_id, newWidth, height)
+    defer img.Free(resized)
     return img.EncodeJPEG(resized, 80)
 )
